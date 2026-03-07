@@ -1,0 +1,5 @@
+{
+  "name": "Mail Monitoring Dashboard",
+  "description": "A comprehensive dashboard for India Post mail booking data analysis, featuring offline support, Excel/CSV uploads, revenue tracking, and automated reporting.",
+  "requestFramePermissions": []
+}
