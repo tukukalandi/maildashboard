@@ -295,7 +295,7 @@ function App() {
                 <div className="flex flex-col items-center text-center mb-8">
                     <div className="w-16 h-16 bg-[#CE2029] text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg"><UploadCloud size={32} /></div>
                     <h2 className="text-3xl font-extrabold text-slate-800 mb-2 tracking-tight">Mail Operations Dashboard</h2>
-                    <p className="text-slate-500 max-w-lg mx-auto">Analyze booking performance across Angul Division. Select a preset report or define a custom period.</p>
+                    <p className="text-slate-500 max-w-lg mx-auto">Dhenkanal Postal Division</p>
                 </div>
 
                 {/* Periodic Selection Section */}
