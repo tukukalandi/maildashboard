@@ -12,10 +12,6 @@ interface DashboardAnalysisProps {
 
 type BookingReportType = 'BO_BOOKED' | 'BO_NOT_BOOKED' | 'PO_BOOKED' | 'PO_NOT_BOOKED';
 
-const formatCurrencyPDF = (amount: number) => {
-  return `Rs. ${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-};
-
 const PRODUCT_CANONICAL_MAP: Record<string, string> = {
   'indiapost parcel retail': 'India Post Parcel Retail',
   'indiapost parcel retail ': 'India Post Parcel Retail',
@@ -279,14 +275,14 @@ const DashboardAnalysis: React.FC<DashboardAnalysisProps> = ({ data, masterData,
         i + 1,
         isSubDiv ? (row as any).subDivisionName : (isJuris ? (row as any).name : (row as any).officeName),
         row.articleCount,
-        formatCurrencyPDF(row.postageAmount),
-        formatCurrencyPDF(row.totalRevenue)
+        formatCurrency(row.postageAmount),
+        formatCurrency(row.totalRevenue)
       ]);
       
       const totalArts = rawData.reduce((s, c) => s + c.articleCount, 0);
       const totalPostage = rawData.reduce((s, c) => s + c.postageAmount, 0);
       const totalRevenue = rawData.reduce((s, c) => s + c.totalRevenue, 0);
-      rows.push(['', 'TOTAL', totalArts, formatCurrencyPDF(totalPostage), formatCurrencyPDF(totalRevenue)]);
+      rows.push(['', 'TOTAL', totalArts, formatCurrency(totalPostage), formatCurrency(totalRevenue)]);
 
       exportToPDF(headers, rows, fileName, false);
     }
@@ -323,12 +319,12 @@ const DashboardAnalysis: React.FC<DashboardAnalysisProps> = ({ data, masterData,
         r.subDivisionName,
         r.articles,
         r.postage.toFixed(2),
-        formatCurrencyPDF(r.amount)
+        formatCurrency(r.amount)
       ]);
       const totalArts = list.reduce((s, c) => s + c.articles, 0);
       const totalPostage = list.reduce((s, c) => s + c.postage, 0);
       const totalAmount = list.reduce((s, c) => s + c.amount, 0);
-      rows.push(['', 'GRAND TOTAL', '', '', totalArts, totalPostage.toFixed(2), formatCurrencyPDF(totalAmount)]);
+      rows.push(['', 'GRAND TOTAL', '', '', totalArts, totalPostage.toFixed(2), formatCurrency(totalAmount)]);
 
       exportToPDF(headers, rows, title, false);
     }
@@ -338,7 +334,7 @@ const DashboardAnalysis: React.FC<DashboardAnalysisProps> = ({ data, masterData,
     <div className="space-y-8 pb-10">
       <section>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-[#CE2029] flex items-center gap-2">
             <IndianRupee className="text-red-700" /> Revenue Analysis Dashboard
           </h2>
           <div className="flex gap-2 w-full sm:w-auto">
@@ -356,7 +352,7 @@ const DashboardAnalysis: React.FC<DashboardAnalysisProps> = ({ data, masterData,
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <h2 className="text-xl font-bold text-[#CE2029] mb-4 flex items-center gap-2">
           <Mail className="text-red-700" /> Product Performance
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -370,7 +366,7 @@ const DashboardAnalysis: React.FC<DashboardAnalysisProps> = ({ data, masterData,
         {selectedContext && reportData && (
           <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-sm">
              <div className="mb-6 border-b border-slate-200 pb-4">
-               <h2 className="text-2xl font-bold text-slate-800">Reports: <span className="text-red-700">{selectedContext}</span></h2>
+               <h2 className="text-2xl font-bold text-[#CE2029]">Reports: <span className="text-red-700">{selectedContext}</span></h2>
                <p className="text-xs text-slate-500 font-medium mt-1 uppercase tracking-wider">Alphabetical Hierarchy Reporting | Zero Articles Included</p>
              </div>
              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -383,7 +379,7 @@ const DashboardAnalysis: React.FC<DashboardAnalysisProps> = ({ data, masterData,
       </div>
 
       <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-         <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+         <h2 className="text-xl font-bold text-[#CE2029] mb-6 flex items-center gap-2">
            <CheckCircle className="text-red-700"/> Booking & Non-Booking Analysis
          </h2>
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -431,12 +427,12 @@ const DashboardAnalysis: React.FC<DashboardAnalysisProps> = ({ data, masterData,
                             )}
                             <tr className="hover:bg-slate-50 transition-colors group">
                               <td className="px-4 py-3 text-slate-400 font-bold">{i + 1}</td>
-                              <td className="px-4 py-3 font-bold text-slate-800">{r.officeName}</td>
+                              <td className="px-4 py-3 font-bold text-[#CE2029]">{r.officeName}</td>
                               <td className="px-4 py-3 text-slate-600 italic">{r.officeJurisdiction}</td>
                               <td className="px-4 py-3 text-slate-600 font-medium">{r.subDivisionName}</td>
                               <td className="px-4 py-3 text-center font-black text-slate-700">{r.articles}</td>
                               <td className="px-4 py-3 text-right font-black text-slate-600">{r.postage.toFixed(2)}</td>
-                              <td className="px-4 py-3 text-right font-black text-slate-900 bg-slate-50/30">{formatCurrency(r.amount)}</td>
+                              <td className="px-4 py-3 text-right font-black text-[#CE2029] bg-slate-50/30">{formatCurrency(r.amount)}</td>
                             </tr>
                           </React.Fragment>
                         ))}
@@ -490,13 +486,13 @@ const DetailedCard = ({ title, data, icon, colorClass, active, onClick, compact 
          </label>
       </div>
       <div className="flex justify-between items-start mb-3">
-        <h3 className={`font-bold text-slate-800 leading-tight ${compact ? 'text-xs min-h-[40px]' : 'text-md'}`}>{title}</h3>
+        <h3 className={`font-bold text-[#CE2029] leading-tight ${compact ? 'text-xs min-h-[40px]' : 'text-md'}`}>{title}</h3>
         {icon && <div className="p-2 bg-white/50 rounded-lg shadow-sm">{icon}</div>}
       </div>
       <div className="space-y-2">
-        <div className="flex justify-between items-center text-sm border-b border-black/5 pb-1"><span className="text-slate-600">Articles</span><span className="font-bold text-slate-900">{data.articles}</span></div>
-        <div className="flex justify-between items-center text-sm border-b border-black/5 pb-1"><span className="text-slate-600">Postage</span><span className="font-bold text-slate-900">{formatCurrency(data.postage)}</span></div>
-        <div className="flex justify-between items-center text-sm pt-1"><span className="text-slate-600 font-medium">Revenue</span><span className="font-bold text-slate-900 bg-white/50 px-2 rounded">{formatCurrency(data.revenue)}</span></div>
+        <div className="flex justify-between items-center text-sm border-b border-black/5 pb-1"><span className="text-slate-600">Articles</span><span className="font-bold text-[#CE2029]">{data.articles}</span></div>
+        <div className="flex justify-between items-center text-sm border-b border-black/5 pb-1"><span className="text-slate-600">Postage</span><span className="font-bold text-[#CE2029]">{formatCurrency(data.postage)}</span></div>
+        <div className="flex justify-between items-center text-sm pt-1"><span className="text-slate-600 font-medium">Revenue</span><span className="font-bold text-[#CE2029] bg-white/50 px-2 rounded">{formatCurrency(data.revenue)}</span></div>
       </div>
     </div>
   );

@@ -116,7 +116,7 @@ const HOReport: React.FC<HOReportProps> = ({ data, masterData, onReupload }) => 
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+          <h2 className="text-2xl font-black text-[#CE2029] flex items-center gap-2">
             <Landmark className="text-[#CE2029]" /> Head Office (HO) Wise Report
           </h2>
           <p className="text-xs text-slate-500 font-medium">Hierarchy: HO &gt; Account Office (SO) &gt; BOs</p>

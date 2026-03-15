@@ -59,3 +59,19 @@ export interface FilterState {
   officeName: string;
   productName: string;
 }
+
+export interface TargetDataRow {
+  slNo: string;
+  officeName: string;
+  officeId: string;
+  // Parcel specific
+  speedPostParcelDomestic?: number;
+  indiaPostParcelRetail?: number;
+  indiaPostParcelContractual?: number;
+  // International specific
+  internationalMailRevenue?: number;
+  // Domestic specific
+  domesticMailRevenue?: number;
+  // Common
+  totalTarget: number;
+}

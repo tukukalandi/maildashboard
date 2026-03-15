@@ -3,12 +3,16 @@ import DataSheet from './components/DataSheet';
 import DashboardAnalysis from './components/DashboardAnalysis';
 import RSBTCellReport from './components/RSBTCellReport';
 import BookingReport from './components/BookingReport';
-import { parseExcelFile, fetchMasterDataFromUrl, fetchBookingDataFromUrl } from './utils';
-import { BookingDataRow, RawBookingRow, MasterDataRow } from './types';
+import TargetAchievement from './components/TargetAchievement';
+import { parseExcelFile, fetchMasterDataFromUrl, fetchBookingDataFromUrl, fetchTargetDataFromUrl } from './utils';
+import { BookingDataRow, RawBookingRow, MasterDataRow, TargetDataRow } from './types';
 import { MASTER_DATA as DEFAULT_MASTER_DATA } from './constants';
-import { LayoutDashboard, Table, UploadCloud, AlertCircle, RefreshCw, Link as LinkIcon, FileSpreadsheet, FileText, ClipboardList, ArrowLeft, Info, CalendarRange } from 'lucide-react';
+import { LayoutDashboard, Table, UploadCloud, AlertCircle, RefreshCw, Link as LinkIcon, FileSpreadsheet, FileText, ClipboardList, ArrowLeft, Info, CalendarRange, Target } from 'lucide-react';
 
 const MASTER_DATA_URL = 'https://docs.google.com/spreadsheets/d/1sqgOjtJ5uaiI6qIG_LZMZ-D0yaUhJG_FVxZLDeQORFA/export?format=csv';
+const TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1rus_MKbi83-87nJvmcAxf41g9hgx59LAJr6YihYTptU/export?format=csv';
+const INTERNATIONAL_TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1rus_MKbi83-87nJvmcAxf41g9hgx59LAJr6YihYTptU/edit?gid=2030284667#gid=2030284667';
+const DOMESTIC_TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1rus_MKbi83-87nJvmcAxf41g9hgx59LAJr6YihYTptU/edit?gid=362384589#gid=362384589';
 
 const MONTHLY_REPORTS = [
     { name: 'April 2025', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=1286396342' },
@@ -52,18 +56,30 @@ const convertToExportUrl = (inputUrl: string): string | null => {
   return url;
 };
 
-type AppTab = 'datasheet' | 'dashboard' | 'rsbt' | 'booking';
+type AppTab = 'datasheet' | 'dashboard' | 'rsbt' | 'booking' | 'target';
 
 function App() {
   const [activeTab, setActiveTab] = useState<AppTab>('datasheet');
   const [rawBookingData, setRawBookingData] = useState<RawBookingRow[]>([]);
   const [masterData, setMasterData] = useState<MasterDataRow[]>(DEFAULT_MASTER_DATA);
+  const [targetData, setTargetData] = useState<TargetDataRow[]>([]);
+  const [internationalTargetData, setInternationalTargetData] = useState<TargetDataRow[]>([]);
+  const [domesticTargetData, setDomesticTargetData] = useState<TargetDataRow[]>([]);
   const [isMasterDataLoading, setIsMasterDataLoading] = useState(false);
+  const [isTargetDataLoading, setIsTargetDataLoading] = useState(false);
+  const [isInternationalTargetLoading, setIsInternationalTargetLoading] = useState(false);
+  const [isDomesticTargetLoading, setIsDomesticTargetLoading] = useState(false);
   const [masterDataSource, setMasterDataSource] = useState<'Default' | 'Synced'>('Default');
+  const [targetDataSource, setTargetDataSource] = useState<'None' | 'Synced'>('None');
+  const [internationalTargetSource, setInternationalTargetSource] = useState<'None' | 'Synced'>('None');
+  const [domesticTargetSource, setDomesticTargetSource] = useState<'None' | 'Synced'>('None');
   const [loading, setLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState<{current: number, total: number, name?: string} | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [customUrl, setCustomUrl] = useState('');
+  const [targetUrl, setTargetUrl] = useState('');
+  const [internationalTargetUrl, setInternationalTargetUrl] = useState('');
+  const [domesticTargetUrl, setDomesticTargetUrl] = useState('');
 
   // Period Selection State
   const [fromMonthIndex, setFromMonthIndex] = useState(0);
@@ -71,6 +87,9 @@ function App() {
 
   useEffect(() => {
     handleSyncMasterData(true);
+    handleSyncTargetData(true);
+    handleSyncInternationalTargetData(true);
+    handleSyncDomesticTargetData(true);
   }, []);
 
   const handleSyncMasterData = async (silent = false) => {
@@ -86,6 +105,75 @@ function App() {
       console.error("Master data sync failed", e);
     } finally {
       if (!silent) setIsMasterDataLoading(false);
+    }
+  };
+
+  const handleSyncTargetData = async (silent = false, overrideUrl?: string) => {
+    const urlToUse = overrideUrl || TARGET_DATA_URL;
+    if (!urlToUse) return;
+    
+    const fetchUrl = convertToExportUrl(urlToUse);
+    if (!fetchUrl) return;
+
+    if (!silent) setIsTargetDataLoading(true);
+    try {
+      const data = await fetchTargetDataFromUrl(fetchUrl, 'Parcel');
+      if (data && data.length > 0) {
+        setTargetData(data);
+        setTargetDataSource('Synced');
+        if(!silent) alert(`Successfully synced ${data.length} parcel target records.`);
+      }
+    } catch (e) {
+      console.error("Target data sync failed", e);
+      if (!silent) alert("Failed to sync target data. Ensure the link is correct and published to the web.");
+    } finally {
+      if (!silent) setIsTargetDataLoading(false);
+    }
+  };
+
+  const handleSyncInternationalTargetData = async (silent = false, overrideUrl?: string) => {
+    const urlToUse = overrideUrl || INTERNATIONAL_TARGET_DATA_URL;
+    if (!urlToUse) return;
+    
+    const fetchUrl = convertToExportUrl(urlToUse);
+    if (!fetchUrl) return;
+
+    if (!silent) setIsInternationalTargetLoading(true);
+    try {
+      const data = await fetchTargetDataFromUrl(fetchUrl, 'International');
+      if (data && data.length > 0) {
+        setInternationalTargetData(data);
+        setInternationalTargetSource('Synced');
+        if(!silent) alert(`Successfully synced ${data.length} international target records.`);
+      }
+    } catch (e) {
+      console.error("International target data sync failed", e);
+      if (!silent) alert("Failed to sync international target data.");
+    } finally {
+      if (!silent) setIsInternationalTargetLoading(false);
+    }
+  };
+
+  const handleSyncDomesticTargetData = async (silent = false, overrideUrl?: string) => {
+    const urlToUse = overrideUrl || DOMESTIC_TARGET_DATA_URL;
+    if (!urlToUse) return;
+    
+    const fetchUrl = convertToExportUrl(urlToUse);
+    if (!fetchUrl) return;
+
+    if (!silent) setIsDomesticTargetLoading(true);
+    try {
+      const data = await fetchTargetDataFromUrl(fetchUrl, 'Domestic');
+      if (data && data.length > 0) {
+        setDomesticTargetData(data);
+        setDomesticTargetSource('Synced');
+        if(!silent) alert(`Successfully synced ${data.length} domestic target records.`);
+      }
+    } catch (e) {
+      console.error("Domestic target data sync failed", e);
+      if (!silent) alert("Failed to sync domestic target data. Ensure the link is correct and published to the web.");
+    } finally {
+      if (!silent) setIsDomesticTargetLoading(false);
     }
   };
 
@@ -239,19 +327,12 @@ function App() {
                </button>
              )}
 
-             <div className="hidden xl:flex items-center gap-2 text-xs text-white/90 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/20">
-               <span className={`w-2 h-2 rounded-full ${masterDataSource === 'Synced' ? 'bg-green-400' : 'bg-amber-400'}`}></span>
-               <span>Master Data: {masterDataSource}</span>
-               <button onClick={() => handleSyncMasterData()} className="ml-2 p-1 hover:bg-white/20 rounded-full transition-colors" title="Sync Master Data">
-                 <RefreshCw size={12} className={isMasterDataLoading ? 'animate-spin' : ''}/>
-               </button>
-             </div>
-
-             <div className="flex gap-1 bg-black/10 p-1 rounded-lg">
+              <div className="flex gap-1 bg-black/10 p-1 rounded-lg">
                 <NavTab active={activeTab === 'datasheet'} onClick={() => setActiveTab('datasheet')} label="Data" icon={<Table size={16}/>}/>
                 <NavTab active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} label="Analysis" icon={<LayoutDashboard size={16}/>}/>
                 <NavTab active={activeTab === 'rsbt'} onClick={() => setActiveTab('rsbt')} label="RSBT Cell" icon={<ClipboardList size={16}/>}/>
                 <NavTab active={activeTab === 'booking'} onClick={() => setActiveTab('booking')} label="Booking Report" icon={<FileText size={16}/>}/>
+                <NavTab active={activeTab === 'target'} onClick={() => setActiveTab('target')} label="Target" icon={<Target size={16}/>}/>
              </div>
           </div>
         </div>
@@ -265,7 +346,7 @@ function App() {
                 <RefreshCw className="text-[#CE2029] animate-spin" size={48}/>
               </div>
               <div className="text-center">
-                <h3 className="font-bold text-slate-800 tracking-wider text-lg">Processing Data</h3>
+                <h3 className="font-bold text-[#CE2029] tracking-wider text-lg">Processing Data</h3>
                 {loadingProgress && (
                   <div className="mt-2">
                     <p className="text-[#CE2029] font-black text-xs uppercase tracking-widest">{loadingProgress.name}</p>
@@ -292,94 +373,178 @@ function App() {
             <div className="bg-white p-0 rounded-2xl shadow-xl border border-slate-200 max-w-4xl w-full overflow-hidden">
               <div className="h-2 bg-[#CE2029]"></div>
               <div className="p-8 md:p-10">
-                <div className="flex flex-col items-center text-center mb-8">
-                    <div className="w-16 h-16 bg-[#CE2029] text-white rounded-2xl flex items-center justify-center mb-4 shadow-lg"><UploadCloud size={32} /></div>
-                    <h2 className="text-3xl font-extrabold text-slate-800 mb-2 tracking-tight">Mail Operations Dashboard</h2>
-                    <p className="text-slate-500 max-w-lg mx-auto">Dhenkanal Postal Division</p>
+                <div className="flex flex-col items-center text-center mb-10">
+                    <div className="w-20 h-20 bg-gradient-to-br from-[#CE2029] to-[#991B1B] text-white rounded-[2rem] flex items-center justify-center mb-6 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
+                      <UploadCloud size={40} />
+                    </div>
+                    <h2 className="text-4xl font-black text-slate-900 mb-3 tracking-tight">Mail Operations <span className="text-[#CE2029]">Dashboard</span></h2>
+                    <p className="text-slate-500 max-w-lg mx-auto font-medium">Dhenkanal Postal Division • Performance Monitoring System</p>
                 </div>
 
-                {/* Periodic Selection Section */}
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 mb-8 shadow-inner">
-                    <div className="flex items-center gap-2 mb-4">
-                        <CalendarRange className="text-[#CE2029]" size={20}/>
-                        <h3 className="font-bold text-slate-700">Custom Period Selection</h3>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">From Month</label>
-                            <select 
-                                value={fromMonthIndex} 
-                                onChange={(e) => setFromMonthIndex(parseInt(e.target.value))}
-                                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-bold shadow-sm focus:ring-2 focus:ring-[#CE2029] focus:outline-none"
-                            >
-                                {MONTHLY_REPORTS.map((m, idx) => (
-                                    <option key={m.name} value={idx}>{m.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">To Month</label>
-                            <select 
-                                value={toMonthIndex} 
-                                onChange={(e) => setToMonthIndex(parseInt(e.target.value))}
-                                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-bold shadow-sm focus:ring-2 focus:ring-[#CE2029] focus:outline-none"
-                            >
-                                {MONTHLY_REPORTS.map((m, idx) => (
-                                    <option key={m.name} value={idx}>{m.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <button 
-                            onClick={loadSelectedPeriod} 
-                            disabled={loading}
-                            className="bg-[#CE2029] text-white font-black uppercase text-xs tracking-widest px-6 py-3 rounded-lg shadow-lg hover:bg-red-700 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
-                        >
-                            Load Selected Period
-                        </button>
-                    </div>
-                    <p className="text-[10px] text-slate-400 mt-3 italic font-medium">Select a start and end month to aggregate multi-month data automatically.</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+                  {/* Annual Report Card */}
+                  <button onClick={loadAnnualReport} disabled={loading} className="relative overflow-hidden group rounded-3xl shadow-xl transition-all hover:shadow-2xl hover:-translate-y-1">
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#CE2029] to-[#7F1D1D]"></div>
+                      <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700">
+                        <FileSpreadsheet size={200} />
+                      </div>
+                      <div className="relative p-8 flex flex-col h-full justify-between min-h-[180px]">
+                           <div className="flex justify-between items-start">
+                              <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md">
+                                <FileSpreadsheet size={24} className="text-white" />
+                              </div>
+                              <div className="bg-white/20 px-3 py-1 rounded-full backdrop-blur-md">
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest">Full Year</span>
+                              </div>
+                           </div>
+                           <div className="text-left mt-4">
+                              <h3 className="text-2xl font-black text-white leading-tight">Annual Report<br/>FY 2025-26</h3>
+                              <p className="text-white/70 text-sm mt-1 font-medium italic">April 2025 - March 2026</p>
+                           </div>
+                      </div>
+                  </button>
+
+                  {/* Custom Period Card */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 shadow-inner flex flex-col justify-between">
+                      <div className="flex items-center gap-3 mb-6">
+                          <div className="p-2.5 bg-white rounded-xl shadow-sm border border-slate-100">
+                            <CalendarRange className="text-[#CE2029]" size={20}/>
+                          </div>
+                          <h3 className="font-black text-slate-800 uppercase tracking-wider text-sm">Custom Range</h3>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div className="space-y-1.5">
+                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">From</label>
+                              <select 
+                                  value={fromMonthIndex} 
+                                  onChange={(e) => setFromMonthIndex(parseInt(e.target.value))}
+                                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold shadow-sm focus:ring-2 focus:ring-[#CE2029] focus:outline-none appearance-none cursor-pointer"
+                              >
+                                  {MONTHLY_REPORTS.map((m, idx) => (
+                                      <option key={m.name} value={idx}>{m.name}</option>
+                                  ))}
+                              </select>
+                          </div>
+                          <div className="space-y-1.5">
+                              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">To</label>
+                              <select 
+                                  value={toMonthIndex} 
+                                  onChange={(e) => setToMonthIndex(parseInt(e.target.value))}
+                                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold shadow-sm focus:ring-2 focus:ring-[#CE2029] focus:outline-none appearance-none cursor-pointer"
+                              >
+                                  {MONTHLY_REPORTS.map((m, idx) => (
+                                      <option key={m.name} value={idx}>{m.name}</option>
+                                  ))}
+                              </select>
+                          </div>
+                      </div>
+                      <button 
+                          onClick={loadSelectedPeriod} 
+                          disabled={loading}
+                          className="w-full bg-slate-900 text-white font-black uppercase text-xs tracking-widest py-4 rounded-xl shadow-lg hover:bg-black transition-all active:scale-95 disabled:opacity-50"
+                      >
+                          Generate Custom Report
+                      </button>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-4 mb-4">
+                <div className="flex items-center gap-4 mb-6">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap">Monthly Quick Access</span>
                   <div className="h-px bg-slate-200 flex-1"></div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Quick Selection</span>
-                  <div className="h-px bg-slate-200 flex-1"></div>
                 </div>
-
-                <button onClick={loadAnnualReport} disabled={loading} className="w-full relative overflow-hidden group rounded-xl shadow-md mb-8">
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#CE2029] to-[#B31B24]"></div>
-                    <div className="relative p-6 flex items-center justify-between">
-                         <div className="flex items-center gap-4">
-                            <FileSpreadsheet size={28} className="text-white/80" />
-                            <div className="text-left">
-                                <h3 className="text-white font-bold">Annual Report FY 2025-26</h3>
-                                <p className="text-white/60 text-xs">Aggregated (April 2025 - March 2026)</p>
-                            </div>
-                         </div>
-                         <div className="bg-white text-[#CE2029] px-4 py-2 rounded-lg font-bold text-sm hover:scale-105 transition-transform">Load Full Year</div>
-                    </div>
-                </button>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
-                  {MONTHLY_REPORTS.map((month) => (
-                    <button key={month.name} onClick={() => loadFromUrl(month.url)} disabled={loading} className="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:border-[#CE2029] hover:bg-white transition-all text-center group shadow-sm">
-                      <span className="font-semibold text-slate-600 text-[11px] group-hover:text-[#CE2029] uppercase tracking-wider">{month.name}</span>
-                    </button>
-                  ))}
+                  {MONTHLY_REPORTS.map((month, idx) => {
+                    const colors = [
+                      'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100',
+                      'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100',
+                      'bg-fuchsia-50 border-fuchsia-200 text-fuchsia-700 hover:bg-fuchsia-100',
+                      'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100',
+                      'bg-violet-50 border-violet-200 text-violet-700 hover:bg-violet-100',
+                      'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100',
+                      'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100',
+                      'bg-sky-50 border-sky-200 text-sky-700 hover:bg-sky-100',
+                      'bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100',
+                      'bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100',
+                      'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100',
+                      'bg-green-50 border-green-200 text-green-700 hover:bg-green-100',
+                    ];
+                    const colorClass = colors[idx % colors.length];
+                    return (
+                      <button 
+                        key={month.name} 
+                        onClick={() => loadFromUrl(month.url)} 
+                        disabled={loading} 
+                        className={`p-4 rounded-xl border transition-all text-center group shadow-sm hover:scale-105 active:scale-95 ${colorClass}`}
+                      >
+                        <span className="font-bold text-xs uppercase tracking-widest">{month.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mb-4">
                     <label className="cursor-pointer block">
-                      <div className="flex items-center gap-3 p-4 border border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-red-50 hover:border-red-300 transition-all h-full">
-                          <UploadCloud size={20} className="text-slate-400"/>
-                          <span className="text-sm font-semibold text-slate-700">Upload Excel/CSV Files (Max 5)</span>
+                      <div className="flex items-center justify-center gap-3 p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 hover:bg-red-50 hover:border-red-200 transition-all">
+                          <UploadCloud size={24} className="text-[#CE2029]"/>
+                          <div className="text-left">
+                            <span className="block text-sm font-bold text-slate-700">Upload Excel/CSV Files</span>
+                            <span className="block text-[10px] text-slate-400 uppercase font-black tracking-tighter">Support multiple files (Max 5)</span>
+                          </div>
                           <input type="file" accept=".csv, .xlsx, .xls" onChange={handleFileUpload} className="hidden" multiple />
                       </div>
                     </label>
-                    <div className="flex items-center gap-2 p-1 border border-slate-300 rounded-xl bg-white shadow-sm overflow-hidden">
-                        <input type="text" value={customUrl} onChange={(e) => setCustomUrl(e.target.value)} placeholder="Custom Google Sheet Link..." className="flex-1 min-w-0 pl-3 py-2 text-sm bg-transparent border-none focus:ring-0 text-slate-800"/>
-                        <button onClick={() => loadFromUrl(customUrl)} disabled={loading} className="bg-[#CE2029] text-white p-2.5 rounded-lg transition-colors hover:bg-red-700"><LinkIcon size={18}/></button>
-                    </div>
+                </div>
+                
+                <div className="flex items-center gap-2 p-1.5 border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden mb-4">
+                    <div className="pl-3 text-slate-400"><LinkIcon size={16}/></div>
+                    <input 
+                      type="text" 
+                      value={customUrl} 
+                      onChange={(e) => setCustomUrl(e.target.value)} 
+                      placeholder="Or paste Google Sheet CSV link here..." 
+                      className="flex-1 min-w-0 px-2 py-2.5 text-sm bg-transparent border-none focus:ring-0 text-slate-800 font-medium"
+                    />
+                    <button 
+                      onClick={() => loadFromUrl(customUrl)} 
+                      disabled={loading || !customUrl} 
+                      className="bg-[#CE2029] text-white px-5 py-2.5 rounded-xl font-bold text-xs transition-all hover:bg-red-700 disabled:opacity-50"
+                    >
+                      LOAD
+                    </button>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-slate-100">
+                  <div className="flex items-center gap-2 mb-4">
+                    <RefreshCw className="text-slate-400" size={16}/>
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Data Synchronization Status</h3>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <SyncStatusBadge 
+                      label="Master Data" 
+                      source={masterDataSource} 
+                      isLoading={isMasterDataLoading} 
+                      onSync={() => handleSyncMasterData()} 
+                    />
+                    <SyncStatusBadge 
+                      label="Parcel Target" 
+                      source={targetDataSource} 
+                      isLoading={isTargetDataLoading} 
+                      onSync={() => handleSyncTargetData()} 
+                    />
+                    <SyncStatusBadge 
+                      label="Intl Target" 
+                      source={internationalTargetSource} 
+                      isLoading={isInternationalTargetLoading} 
+                      onSync={() => handleSyncInternationalTargetData()} 
+                    />
+                    <SyncStatusBadge 
+                      label="Domestic Target" 
+                      source={domesticTargetSource} 
+                      isLoading={isDomesticTargetLoading} 
+                      onSync={() => handleSyncDomesticTargetData()} 
+                    />
+                  </div>
                 </div>
 
                 {error && (
@@ -410,6 +575,16 @@ function App() {
             {activeTab === 'dashboard' && <DashboardAnalysis data={enrichedBookingData} masterData={masterData} onReupload={triggerReupload} />}
             {activeTab === 'rsbt' && <RSBTCellReport data={enrichedBookingData} masterData={masterData} onReupload={triggerReupload} />}
             {activeTab === 'booking' && <BookingReport data={enrichedBookingData} masterData={masterData} onReupload={triggerReupload} />}
+            {activeTab === 'target' && (
+              <TargetAchievement 
+                data={enrichedBookingData} 
+                targetData={targetData} 
+                internationalTargetData={internationalTargetData}
+                domesticTargetData={domesticTargetData}
+                masterData={masterData} 
+                onReupload={triggerReupload} 
+              />
+            )}
           </div>
         )}
       </main>
@@ -423,6 +598,26 @@ const NavTab = ({ active, onClick, label, icon }: any) => (
   }`}>
     {icon} <span className="hidden sm:inline">{label}</span>
   </button>
+);
+
+const SyncStatusBadge = ({ label, source, isLoading, onSync }: any) => (
+  <div className="flex items-center justify-between gap-2 bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl shadow-sm">
+    <div className="flex items-center gap-2 overflow-hidden">
+      <span className={`shrink-0 w-2 h-2 rounded-full ${source === 'Synced' ? 'bg-green-500' : 'bg-amber-500'}`}></span>
+      <div className="flex flex-col overflow-hidden">
+        <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter truncate">{label}</span>
+        <span className="text-[10px] font-bold text-slate-700 truncate">{source}</span>
+      </div>
+    </div>
+    <button 
+      onClick={onSync} 
+      disabled={isLoading}
+      className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors text-slate-500 disabled:opacity-50"
+      title={`Sync ${label}`}
+    >
+      <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''}/>
+    </button>
+  </div>
 );
 
 export default App;

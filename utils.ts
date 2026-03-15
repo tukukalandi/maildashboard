@@ -1,7 +1,7 @@
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { RawBookingRow, MasterDataRow } from './types';
+import { RawBookingRow, MasterDataRow, TargetDataRow } from './types';
 import { PRODUCTS } from './constants';
 
 // Relocation Mapping (Ensuring all 7 relocated BOs are precisely handled)
@@ -248,10 +248,13 @@ export const fetchBookingDataFromUrl = async (url: string): Promise<RawBookingRo
 };
 
 export const formatCurrency = (val: number) => {
-  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val);
+  return 'Rs. ' + new Intl.NumberFormat('en-IN', { 
+    minimumFractionDigits: 2, 
+    maximumFractionDigits: 2 
+  }).format(val);
 };
 
-export const exportToPDF = (headers: string[], data: any[][], title: string, landscape = false) => {
+export const exportToPDF = (headers: string[], data: any[][], title: string, landscape = false, footer?: any[]) => {
   const doc = new jsPDF(landscape ? 'l' : 'p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -276,6 +279,7 @@ export const exportToPDF = (headers: string[], data: any[][], title: string, lan
   autoTable(doc, {
     head: [headers],
     body: data,
+    foot: footer ? [footer] : undefined,
     startY: 38,
     theme: 'grid',
     styles: { 
@@ -290,6 +294,12 @@ export const exportToPDF = (headers: string[], data: any[][], title: string, lan
       fontStyle: 'bold',
       halign: 'center'
     },
+    footStyles: {
+      fillColor: [240, 240, 240],
+      textColor: [0, 0, 0],
+      fontStyle: 'bold',
+      halign: 'right'
+    },
     alternateRowStyles: { 
       fillColor: [255, 241, 241]
     },
@@ -297,6 +307,16 @@ export const exportToPDF = (headers: string[], data: any[][], title: string, lan
       const val = String(dataCell.cell.raw).toLowerCase();
       if (val === '0' || val === '0.00' || val === 'rs. 0.00') {
         dataCell.cell.styles.textColor = [206, 32, 41];
+      }
+      // Center align Sl No and Percentage columns
+      if (dataCell.column.index === 0 || dataCell.column.index === headers.length - 1) {
+        dataCell.cell.styles.halign = 'center';
+      }
+      // Bold the total row (usually has 'TOTAL' in the second column)
+      const cellValue = String(dataCell.row.cells[1]?.raw || '');
+      if (cellValue.includes('TOTAL')) {
+        dataCell.cell.styles.fontStyle = 'bold';
+        dataCell.cell.styles.fillColor = [240, 240, 240];
       }
     },
     didDrawPage: (dataPage) => {
@@ -316,4 +336,73 @@ export const exportToExcel = (data: any[], fileName: string) => {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Report");
   XLSX.writeFile(wb, `${fileName}.xlsx`);
+};
+
+export const fetchTargetDataFromUrl = async (url: string, type: 'Parcel' | 'International' | 'Domestic' = 'Parcel'): Promise<TargetDataRow[]> => {
+  try {
+    const response = await fetch(url, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch target data`);
+    const text = await response.text();
+    
+    const lines = text.split(/\r?\n/);
+    const targetData: TargetDataRow[] = [];
+    
+    lines.forEach((line, index) => {
+      if (index === 0 || !line.trim()) return;
+
+      const row = parseCSVLine(line);
+      
+      const slNo = row[0] ? String(row[0]).trim() : '';
+      const rawId = row[2] ? String(row[2]).trim() : '';
+      const rawName = row[1] ? String(row[1]).trim() : '';
+      
+      if (!rawId || isNaN(parseInt(rawId)) || parseInt(rawId) === 0) return;
+
+      const { id: officeId, name: officeName } = normalizeOffice(rawId, rawName);
+
+      if (type === 'Parcel') {
+        if (row.length < 6) return;
+        const speedPostParcelDomestic = parseNumber(row[3]);
+        const indiaPostParcelRetail = parseNumber(row[4]);
+        const indiaPostParcelContractual = parseNumber(row[5]);
+        
+        targetData.push({
+          slNo,
+          officeName,
+          officeId,
+          speedPostParcelDomestic,
+          indiaPostParcelRetail,
+          indiaPostParcelContractual,
+          totalTarget: speedPostParcelDomestic + indiaPostParcelRetail + indiaPostParcelContractual
+        });
+      } else if (type === 'International') {
+        if (row.length < 4) return;
+        const internationalMailRevenue = parseNumber(row[3]);
+        
+        targetData.push({
+          slNo,
+          officeName,
+          officeId,
+          internationalMailRevenue,
+          totalTarget: internationalMailRevenue
+        });
+      } else if (type === 'Domestic') {
+        if (row.length < 4) return;
+        const domesticMailRevenue = parseNumber(row[3]);
+        
+        targetData.push({
+          slNo,
+          officeName,
+          officeId,
+          domesticMailRevenue,
+          totalTarget: domesticMailRevenue
+        });
+      }
+    });
+
+    return targetData;
+  } catch (error) {
+    console.error("Error fetching target data:", error);
+    return [];
+  }
 };

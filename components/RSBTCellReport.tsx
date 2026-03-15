@@ -224,7 +224,7 @@ const RSBTCellReport: React.FC<RSBTCellReportProps> = ({ data, masterData, onReu
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
+          <h3 className="font-bold text-[#CE2029] mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
             <div className="p-1.5 bg-amber-50 text-amber-600 rounded-lg"><Home size={18}/></div>
             Branch Office (BO) Performance
           </h3>
@@ -237,7 +237,7 @@ const RSBTCellReport: React.FC<RSBTCellReportProps> = ({ data, masterData, onReu
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
+          <h3 className="font-bold text-[#CE2029] mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
             <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><Landmark size={18}/></div>
             Sub Office / PO Performance
           </h3>
@@ -253,7 +253,7 @@ const RSBTCellReport: React.FC<RSBTCellReportProps> = ({ data, masterData, onReu
       <div ref={detailRef} className="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
+            <h2 className="text-xl font-black text-[#CE2029] flex items-center gap-2">
               <ClipboardList className="text-[#CE2029]" /> Detailed Monitoring Dashboard
             </h2>
             <p className="text-[11px] text-slate-500 font-medium italic">Colorful Performance Tracking (Sub-Division A-Z)</p>

@@ -123,12 +123,12 @@ const DataSheet: React.FC<DataSheetProps> = ({ data, onReupload }) => {
             <tbody className="bg-white divide-y divide-slate-200">
               {filteredData.map((row, idx) => (
                 <tr key={`${row.officeId}-${idx}`} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">{row.officeId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-[#CE2029]">{row.officeId}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{row.officeName}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 italic">{row.productName}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 text-right font-bold">{row.articles}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700 text-right">{row.postage.toFixed(2)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-black text-right">{formatCurrency(row.totalAmount)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#CE2029] font-black text-right">{formatCurrency(row.totalAmount)}</td>
                 </tr>
               ))}
             </tbody>

@@ -16,6 +16,36 @@ const BookingReport: React.FC<BookingReportProps> = ({ data, masterData, onReupl
   const [searchTerm, setSearchTerm] = useState('');
   const [officeTypeFilter, setOfficeTypeFilter] = useState<OfficeTypeFilter>('All');
   const [productFilter, setProductFilter] = useState<ProductFilter>('All Type');
+  const [selectedHO, setSelectedHO] = useState<string | null>(null);
+
+  const hoSpeedPostStats = useMemo(() => {
+    const stats: Record<string, { articles: number; postage: number; amount: number }> = {
+      'Angul H.O': { articles: 0, postage: 0, amount: 0 },
+      'Dhenkanal H.O': { articles: 0, postage: 0, amount: 0 }
+    };
+
+    // Create a map of officeId to headOfficeName for quick lookup
+    const officeToHO = new Map<string, string>();
+    masterData.forEach(m => {
+      if (m.headOfficeName) {
+        officeToHO.set(m.officeId, m.headOfficeName);
+      }
+    });
+
+    data.forEach(row => {
+      const hoName = officeToHO.get(row.officeId);
+      if (hoName && (hoName === 'Angul H.O' || hoName === 'Dhenkanal H.O')) {
+        const isISP = row.productName.toLowerCase().includes('speed post') && !row.productName.toLowerCase().includes('parcel');
+        if (isISP) {
+          stats[hoName as keyof typeof stats].articles += row.articles;
+          stats[hoName as keyof typeof stats].postage += row.postage;
+          stats[hoName as keyof typeof stats].amount += row.totalAmount;
+        }
+      }
+    });
+
+    return stats;
+  }, [data, masterData]);
 
   const reportData = useMemo(() => {
     const officeMap = new Map<string, any>();
@@ -217,7 +247,7 @@ const BookingReport: React.FC<BookingReportProps> = ({ data, masterData, onReupl
       <section className="bg-white p-6 rounded-2xl shadow-md border border-slate-200">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div className="flex-1">
-            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2 mb-1">
+            <h2 className="text-xl font-black text-[#CE2029] flex items-center gap-2 mb-1">
               <Filter className="text-[#CE2029]" size={20} /> Advanced Search & Filtering
             </h2>
             <p className="text-[11px] text-slate-500 font-medium">Filter by product category or search by Name, ID, or Sub-Division.</p>
@@ -279,12 +309,84 @@ const BookingReport: React.FC<BookingReportProps> = ({ data, masterData, onReupl
         </div>
       </section>
 
+      {/* HO Wise Speed Post Summary Cards */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {(Object.entries(hoSpeedPostStats) as [string, { articles: number; postage: number; amount: number }][]).map(([hoName, stats]) => (
+          <div 
+            key={hoName}
+            onClick={() => setSelectedHO(selectedHO === hoName ? null : hoName)}
+            className={`cursor-pointer p-6 rounded-2xl shadow-md border transition-all duration-300 ${
+              selectedHO === hoName 
+                ? 'bg-slate-800 border-slate-800 text-white scale-[1.02]' 
+                : 'bg-white border-slate-200 hover:border-[#CE2029] hover:shadow-lg'
+            }`}
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className={`text-lg font-black ${selectedHO === hoName ? 'text-white' : 'text-[#CE2029]'}`}>
+                  {hoName} Speed Post
+                </h3>
+                <p className={`text-[10px] font-bold uppercase tracking-widest ${selectedHO === hoName ? 'text-slate-400' : 'text-slate-500'}`}>
+                  Head Office Summary
+                </p>
+              </div>
+              <div className={`p-2 rounded-lg ${selectedHO === hoName ? 'bg-slate-700' : 'bg-red-50'}`}>
+                <TrendingUp className={selectedHO === hoName ? 'text-white' : 'text-[#CE2029]'} size={20} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-1">
+                <p className="text-[9px] font-black uppercase text-slate-400">Articles</p>
+                <p className="text-xl font-black">{stats.articles}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[9px] font-black uppercase text-slate-400">Postage</p>
+                <p className="text-xl font-black">{stats.postage.toFixed(2)}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[9px] font-black uppercase text-slate-400">Revenue</p>
+                <p className={`text-xl font-black ${selectedHO === hoName ? 'text-emerald-400' : 'text-emerald-600'}`}>
+                  {formatCurrency(stats.amount)}
+                </p>
+              </div>
+            </div>
+
+            {selectedHO === hoName && (
+              <div className="mt-6 pt-6 border-t border-slate-700 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="flex items-center gap-2 mb-4">
+                  <Star size={14} className="text-amber-400 fill-amber-400" />
+                  <span className="text-xs font-bold text-slate-300">Detailed performance for {hoName} Jurisdiction</span>
+                </div>
+                <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400">Total Speed Post Booking</span>
+                    <span className="font-black text-white">{stats.articles} Articles</span>
+                  </div>
+                  <div className="h-px bg-slate-700 my-2"></div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400">Total Postage Collected</span>
+                    <span className="font-black text-white">₹{stats.postage.toFixed(2)}</span>
+                  </div>
+                  <div className="h-px bg-slate-700 my-2"></div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-400">Total Revenue (Amount)</span>
+                    <span className="font-black text-emerald-400">{formatCurrency(stats.amount)}</span>
+                  </div>
+                </div>
+                <p className="text-[9px] text-slate-500 mt-3 italic">* Includes all Sub-Offices (SO) and Branch Offices (BO) under {hoName}.</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </section>
+
       {/* Top 10 High Performers Section */}
       <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2">
             <Trophy className="text-amber-500" size={24}/>
-            <h2 className="text-xl font-bold text-slate-800">Top Performers - <span className="text-[#CE2029]">{productFilter}</span></h2>
+            <h2 className="text-xl font-bold text-[#CE2029]">Top Performers - <span className="text-[#CE2029]">{productFilter}</span></h2>
           </div>
           <div className="flex gap-2">
              <div className="px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-100 shadow-sm flex items-center gap-1">
@@ -327,7 +429,7 @@ const BookingReport: React.FC<BookingReportProps> = ({ data, masterData, onReupl
                           {i === 0 ? <Star size={14} className="text-amber-500 fill-amber-500 inline"/> : i + 1}
                         </td>
                         <td className="px-3 py-2">
-                          <div className="font-bold text-slate-800">{o.officeName}</div>
+                          <div className="font-bold text-[#CE2029]">{o.officeName}</div>
                           <div className="text-[9px] text-slate-400 font-mono">{o.officeId}</div>
                         </td>
                         <td className="px-3 py-2 text-center text-slate-600 font-medium">{o.subDivision}</td>
@@ -374,7 +476,7 @@ const BookingReport: React.FC<BookingReportProps> = ({ data, masterData, onReupl
                           {i === 0 ? <Star size={14} className="text-amber-500 fill-amber-500 inline"/> : i + 1}
                         </td>
                         <td className="px-3 py-2">
-                          <div className="font-bold text-slate-800">{o.officeName}</div>
+                          <div className="font-bold text-[#CE2029]">{o.officeName}</div>
                           <div className="text-[9px] text-slate-400 font-mono">{o.officeId}</div>
                         </td>
                         <td className="px-3 py-2 text-center text-slate-600 font-medium">{o.subDivision}</td>
@@ -394,7 +496,7 @@ const BookingReport: React.FC<BookingReportProps> = ({ data, masterData, onReupl
       <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-200 flex flex-col min-h-0">
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6 shrink-0">
           <div>
-            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
+            <h2 className="text-xl font-black text-[#CE2029] flex items-center gap-2">
               <FileText className="text-[#CE2029]" /> Cumulative Booking Report
             </h2>
             <p className="text-[11px] text-slate-500 font-medium">Hierarchy: Sub-Division A-Z &gt; Office Name A-Z | Filter results via search above.</p>
@@ -440,7 +542,7 @@ const BookingReport: React.FC<BookingReportProps> = ({ data, masterData, onReupl
                 {filteredData.map((row, idx) => (
                   <tr key={row.officeId} className="hover:bg-slate-50 transition-colors group">
                     <td className="px-4 py-3 text-slate-400 font-bold border-r border-slate-100">{idx + 1}</td>
-                    <td className="px-4 py-3 font-black text-slate-800 border-r border-slate-100">{row.officeName}</td>
+                    <td className="px-4 py-3 font-black text-[#CE2029] border-r border-slate-100">{row.officeName}</td>
                     <td className="px-4 py-3 text-slate-600 border-r border-slate-100">{row.officeJurisdiction}</td>
                     <td className="px-4 py-3 text-slate-600 border-r border-slate-100">{row.subDivision}</td>
                     <td className="px-4 py-3 text-center border-r border-slate-100">
