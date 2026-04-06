@@ -10,23 +10,23 @@ import { MASTER_DATA as DEFAULT_MASTER_DATA } from './constants';
 import { LayoutDashboard, Table, UploadCloud, AlertCircle, RefreshCw, Link as LinkIcon, FileSpreadsheet, FileText, ClipboardList, ArrowLeft, Info, CalendarRange, Target } from 'lucide-react';
 
 const MASTER_DATA_URL = 'https://docs.google.com/spreadsheets/d/1sqgOjtJ5uaiI6qIG_LZMZ-D0yaUhJG_FVxZLDeQORFA/export?format=csv';
-const TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1rus_MKbi83-87nJvmcAxf41g9hgx59LAJr6YihYTptU/export?format=csv';
-const INTERNATIONAL_TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1rus_MKbi83-87nJvmcAxf41g9hgx59LAJr6YihYTptU/edit?gid=2030284667#gid=2030284667';
-const DOMESTIC_TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1rus_MKbi83-87nJvmcAxf41g9hgx59LAJr6YihYTptU/edit?gid=362384589#gid=362384589';
+const TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1A1JBFKd57lQteLAsbtrQmVYLi19RHpngJOhf0G_Bacc/edit?gid=1526550329#gid=1526550329';
+const INTERNATIONAL_TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1A1JBFKd57lQteLAsbtrQmVYLi19RHpngJOhf0G_Bacc/edit?gid=1951675497#gid=1951675497';
+const DOMESTIC_TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1A1JBFKd57lQteLAsbtrQmVYLi19RHpngJOhf0G_Bacc/edit?gid=0#gid=0';
 
 const MONTHLY_REPORTS = [
-    { name: 'April 2025', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=1286396342' },
-    { name: 'May 2025', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=1250449318' },
-    { name: 'June 2025', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=1901550934' },
-    { name: 'July 2025', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=727421896' },
-    { name: 'Aug 2025', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=1386667955' },
-    { name: 'Sept 2025', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=1678804497' },
-    { name: 'Oct 2025', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=1866207457' },
-    { name: 'Nov 2025', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=0' },
-    { name: 'Dec 2025', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=1401133633' },
-    { name: 'Jan 2026', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=1660855752' },
-    { name: 'Feb 2026', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=303541532' },
-    { name: 'March 2026', url: 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=1940660600' },
+    { name: 'April 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=0#gid=0' },
+    { name: 'May 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=839442657#gid=839442657' },
+    { name: 'June 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=683054627#gid=683054627' },
+    { name: 'July 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=189565733#gid=189565733' },
+    { name: 'August 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=824557769#gid=824557769' },
+    { name: 'September 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=1142181835#gid=1142181835' },
+    { name: 'October 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=1432144130#gid=1432144130' },
+    { name: 'November 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=186709521#gid=186709521' },
+    { name: 'December 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=829868291#gid=829868291' },
+    { name: 'January 2027', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=355126831#gid=355126831' },
+    { name: 'February 2027', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=826964675#gid=826964675' },
+    { name: 'March 2027', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=753220460#gid=753220460' },
 ];
 
 /**
@@ -313,7 +313,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
              <button onClick={hardReload} title="Hard Reload App" className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-[#CE2029] font-bold shadow-sm hover:scale-110 transition-transform active:scale-95">IP</button>
-             <h1 className="text-xl font-bold text-white tracking-wide hidden lg:block">Mail Booking Monitoring</h1>
+             <h1 className="text-xl font-bold text-white tracking-wide hidden lg:block">Mail Operation 2026-2027</h1>
           </div>
           
           <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto no-scrollbar">
@@ -377,7 +377,7 @@ function App() {
                     <div className="w-20 h-20 bg-gradient-to-br from-[#CE2029] to-[#991B1B] text-white rounded-[2rem] flex items-center justify-center mb-6 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
                       <UploadCloud size={40} />
                     </div>
-                    <h2 className="text-4xl font-black text-slate-900 mb-3 tracking-tight">Mail Operations <span className="text-[#CE2029]">Dashboard</span></h2>
+                    <h2 className="text-4xl font-black text-slate-900 mb-3 tracking-tight">Mail Operation <span className="text-[#CE2029]">2026-2027</span></h2>
                     <p className="text-slate-500 max-w-lg mx-auto font-medium">Dhenkanal Postal Division • Performance Monitoring System</p>
                 </div>
 
@@ -398,8 +398,8 @@ function App() {
                               </div>
                            </div>
                            <div className="text-left mt-4">
-                              <h3 className="text-2xl font-black text-white leading-tight">Annual Report<br/>FY 2025-26</h3>
-                              <p className="text-white/70 text-sm mt-1 font-medium italic">April 2025 - March 2026</p>
+                              <h3 className="text-2xl font-black text-white leading-tight">Annual Report<br/>FY 2026-27</h3>
+                              <p className="text-white/70 text-sm mt-1 font-medium italic">April 2026 - March 2027</p>
                            </div>
                       </div>
                   </button>
@@ -481,6 +481,42 @@ function App() {
                       </button>
                     );
                   })}
+                </div>
+
+                <div className="flex items-center gap-4 mb-6">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap">Source Data Management</span>
+                  <div className="h-px bg-slate-200 flex-1"></div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                  <a 
+                    href="https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?usp=sharing" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-[#CE2029] transition-all group"
+                  >
+                    <div className="p-3 bg-red-50 rounded-xl text-[#CE2029] group-hover:bg-[#CE2029] group-hover:text-white transition-colors">
+                      <FileSpreadsheet size={20} />
+                    </div>
+                    <div className="text-left">
+                      <span className="block text-sm font-bold text-slate-700">Booking Report 2026-27</span>
+                      <span className="block text-[10px] text-slate-400 uppercase font-black tracking-tighter">Click to edit source data</span>
+                    </div>
+                  </a>
+                  <a 
+                    href="https://docs.google.com/spreadsheets/d/1A1JBFKd57lQteLAsbtrQmVYLi19RHpngJOhf0G_Bacc/edit?usp=sharing" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-[#CE2029] transition-all group"
+                  >
+                    <div className="p-3 bg-red-50 rounded-xl text-[#CE2029] group-hover:bg-[#CE2029] group-hover:text-white transition-colors">
+                      <Target size={20} />
+                    </div>
+                    <div className="text-left">
+                      <span className="block text-sm font-bold text-slate-700">BD Targets FY 2026-27</span>
+                      <span className="block text-[10px] text-slate-400 uppercase font-black tracking-tighter">Click to edit target data</span>
+                    </div>
+                  </a>
                 </div>
 
                 <div className="mb-4">
