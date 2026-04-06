@@ -7,7 +7,7 @@ import TargetAchievement from './components/TargetAchievement';
 import { parseExcelFile, fetchMasterDataFromUrl, fetchBookingDataFromUrl, fetchTargetDataFromUrl } from './utils';
 import { BookingDataRow, RawBookingRow, MasterDataRow, TargetDataRow } from './types';
 import { MASTER_DATA as DEFAULT_MASTER_DATA } from './constants';
-import { LayoutDashboard, Table, UploadCloud, AlertCircle, RefreshCw, Link as LinkIcon, FileSpreadsheet, FileText, ClipboardList, ArrowLeft, Info, CalendarRange, Target } from 'lucide-react';
+import { LayoutDashboard, Table, UploadCloud, AlertCircle, RefreshCw, Link as LinkIcon, FileSpreadsheet, FileText, ClipboardList, ArrowLeft, Info, CalendarRange, Target, Database } from 'lucide-react';
 
 const MASTER_DATA_URL = 'https://docs.google.com/spreadsheets/d/1sqgOjtJ5uaiI6qIG_LZMZ-D0yaUhJG_FVxZLDeQORFA/export?format=csv';
 const TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1A1JBFKd57lQteLAsbtrQmVYLi19RHpngJOhf0G_Bacc/edit?gid=1526550329#gid=1526550329';
@@ -488,7 +488,7 @@ function App() {
                   <div className="h-px bg-slate-200 flex-1"></div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                   <a 
                     href="https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?usp=sharing" 
                     target="_blank" 
@@ -515,6 +515,20 @@ function App() {
                     <div className="text-left">
                       <span className="block text-sm font-bold text-slate-700">BD Targets FY 2026-27</span>
                       <span className="block text-[10px] text-slate-400 uppercase font-black tracking-tighter">Click to edit target data</span>
+                    </div>
+                  </a>
+                  <a 
+                    href="https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/edit?gid=2034712139#gid=2034712139" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-[#CE2029] transition-all group"
+                  >
+                    <div className="p-3 bg-red-50 rounded-xl text-[#CE2029] group-hover:bg-[#CE2029] group-hover:text-white transition-colors">
+                      <Database size={20} />
+                    </div>
+                    <div className="text-left">
+                      <span className="block text-sm font-bold text-slate-700">Master Data</span>
+                      <span className="block text-[10px] text-slate-400 uppercase font-black tracking-tighter">Click to edit office mappings</span>
                     </div>
                   </a>
                 </div>
