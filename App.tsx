@@ -22,21 +22,6 @@ const MONTHS = [
   "October 2026", "November 2026", "December 2026", "January 2027", "February 2027", "March 2027"
 ];
 
-const MONTHLY_REPORTS_PLACEHOLDERS = [
-    { name: 'April 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=0#gid=0' },
-    { name: 'May 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=839442657#gid=839442657' },
-    { name: 'June 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=683054627#gid=683054627' },
-    { name: 'July 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=189565733#gid=189565733' },
-    { name: 'August 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=824557769#gid=824557769' },
-    { name: 'September 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=1142181835#gid=1142181835' },
-    { name: 'October 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=1432144130#gid=1432144130' },
-    { name: 'November 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=186709521#gid=186709521' },
-    { name: 'December 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=829868291#gid=829868291' },
-    { name: 'January 2027', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=355126831#gid=355126831' },
-    { name: 'February 2027', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=826964675#gid=826964675' },
-    { name: 'March 2027', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=753220460#gid=753220460' },
-];
-
 /**
  * Converts Google Sheets URLs to direct CSV export URLs.
  */
@@ -308,7 +293,19 @@ function App() {
   };
 
   const loadAnnualReport = () => {
-    loadFromUrl(MONTHLY_REPORTS_PLACEHOLDERS);
+    if (internationalReports.length === 0) {
+      alert("No international reports available in the database to generate an annual report.");
+      return;
+    }
+    
+    // Aggregate all available data from Firebase
+    const allData = internationalReports.reduce((acc, report) => {
+      return [...acc, ...report.data];
+    }, [] as RawBookingRow[]);
+
+    setRawBookingData(allData);
+    setActiveTab('dashboard');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const loadSelectedPeriod = () => {
@@ -316,8 +313,26 @@ function App() {
       alert("'To Month' cannot be earlier than 'From Month'.");
       return;
     }
-    const selectedRange = MONTHLY_REPORTS_PLACEHOLDERS.slice(fromMonthIndex, toMonthIndex + 1);
-    loadFromUrl(selectedRange);
+
+    const selectedMonths = MONTHS.slice(fromMonthIndex, toMonthIndex + 1);
+    
+    // Find reports in Firebase matching the selected range
+    const filteredReports = internationalReports.filter(report => 
+      selectedMonths.includes(report.month)
+    );
+
+    if (filteredReports.length === 0) {
+      alert(`No reports found in the database for the selected period (${MONTHS[fromMonthIndex]} to ${MONTHS[toMonthIndex]}).`);
+      return;
+    }
+
+    const aggregatedData = filteredReports.reduce((acc, report) => {
+      return [...acc, ...report.data];
+    }, [] as RawBookingRow[]);
+
+    setRawBookingData(aggregatedData);
+    setActiveTab('dashboard');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const loadFromFirestore = (report: InternationalReport) => {
@@ -469,8 +484,8 @@ function App() {
                                   onChange={(e) => setFromMonthIndex(parseInt(e.target.value))}
                                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold shadow-sm focus:ring-2 focus:ring-[#CE2029] focus:outline-none appearance-none cursor-pointer"
                               >
-                                  {MONTHLY_REPORTS_PLACEHOLDERS.map((m, idx) => (
-                                      <option key={m.name} value={idx}>{m.name}</option>
+                                  {MONTHS.map((m, idx) => (
+                                      <option key={m} value={idx}>{m}</option>
                                   ))}
                               </select>
                           </div>
@@ -481,8 +496,8 @@ function App() {
                                   onChange={(e) => setToMonthIndex(parseInt(e.target.value))}
                                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold shadow-sm focus:ring-2 focus:ring-[#CE2029] focus:outline-none appearance-none cursor-pointer"
                               >
-                                  {MONTHLY_REPORTS_PLACEHOLDERS.map((m, idx) => (
-                                      <option key={m.name} value={idx}>{m.name}</option>
+                                  {MONTHS.map((m, idx) => (
+                                      <option key={m} value={idx}>{m}</option>
                                   ))}
                               </select>
                           </div>
@@ -498,7 +513,7 @@ function App() {
                 </div>
 
                 <div className="flex items-center gap-4 mb-6">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap">International Mail Reports</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap">Monthly Mail Reports</span>
                   <div className="h-px bg-slate-200 flex-1"></div>
                   <button 
                     onClick={() => setShowPortal(true)}
@@ -513,7 +528,7 @@ function App() {
                     <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center mx-auto mb-4">
                       <Globe className="text-slate-300" size={24} />
                     </div>
-                    <p className="text-slate-500 font-bold text-sm">No international reports saved yet.</p>
+                    <p className="text-slate-500 font-bold text-sm">No monthly mail reports saved yet.</p>
                     <p className="text-slate-400 text-[10px] uppercase font-black tracking-widest mt-1">Visit Admin Portal to upload data</p>
                   </div>
                 ) : (

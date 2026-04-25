@@ -444,13 +444,6 @@ const DashboardAnalysis: React.FC<DashboardAnalysisProps> = ({ data, masterData,
            )}
          </div>
        </section>
-
-       <footer className="mt-8 pt-8 border-t border-slate-100 flex flex-col items-center">
-         <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2">Automated Revenue Analysis • Dhenkanal Division</p>
-         <p className="text-sm font-bold text-slate-700">
-           Prepared by <span className="text-[#CE2029]">Kalandi Charan Sahoo</span>, OA, DO, Dhenkanal
-         </p>
-       </footer>
     </div>
   );
 };

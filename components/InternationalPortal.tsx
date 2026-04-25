@@ -167,19 +167,41 @@ const InternationalPortal: React.FC<InternationalPortalProps> = ({ onClose }) =>
     }
   };
 
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; month: string } | null>(null);
+
   const handleDelete = async (id: string, month: string) => {
-    if (!window.confirm(`Are you sure you want to delete the report for ${month}?`)) return;
+    setDeleteConfirm({ id, month });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
+    const { id, month } = deleteConfirm;
     const path = `international_reports/${id}`;
+    
+    setIsSaving(true);
+    setStatus(null);
     try {
       await deleteDoc(doc(db, "international_reports", id));
-      setStatus({ type: 'success', message: `Deleted ${month} report.` });
+      setStatus({ type: 'success', message: `Deleted report for ${month}.` });
+      setDeleteConfirm(null);
     } catch (error) {
       console.error("Delete failed", error);
       try {
         handleFirestoreError(error, OperationType.DELETE, path);
       } catch (wrappedError: any) {
-        setStatus({ type: 'error', message: wrappedError.message });
+        let msg = "Delete failed.";
+        try {
+          const parsed = JSON.parse(wrappedError.message);
+          if (parsed.error.includes("insufficient permissions")) {
+            msg = "Permission Denied: You are not authorized to delete this report.";
+          }
+        } catch (e) {
+          msg = wrappedError.message;
+        }
+        setStatus({ type: 'error', message: msg });
       }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -196,7 +218,7 @@ const InternationalPortal: React.FC<InternationalPortalProps> = ({ onClose }) =>
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `International_Report_${report.month.replace(' ', '_')}.csv`);
+    link.setAttribute("download", `Monthly_Report_${report.month.replace(' ', '_')}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -211,7 +233,7 @@ const InternationalPortal: React.FC<InternationalPortalProps> = ({ onClose }) =>
             <Globe className="text-white" size={20} />
           </div>
           <div>
-            <h2 className="text-white font-black uppercase tracking-tight">International Mail Portal</h2>
+            <h2 className="text-white font-black uppercase tracking-tight">Monthly Mail Portal</h2>
             <p className="text-blue-300 text-[10px] uppercase font-bold tracking-widest">Internal Management System</p>
           </div>
         </div>
@@ -227,7 +249,7 @@ const InternationalPortal: React.FC<InternationalPortalProps> = ({ onClose }) =>
               <LogIn className="text-slate-400" size={48} />
             </div>
             <h3 className="text-xl font-bold text-slate-800 mb-2">Internal Access Only</h3>
-            <p className="text-slate-500 text-sm max-w-sm mb-8">Please sign in with your authorized Google account to manage international mail data.</p>
+            <p className="text-slate-500 text-sm max-w-sm mb-8">Please sign in with your authorized Google account to manage monthly mail data.</p>
             <button 
               onClick={handleSignIn}
               className="flex items-center gap-2 bg-[#CE2029] text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-red-700 transition-all shadow-lg active:scale-95"
@@ -368,6 +390,36 @@ const InternationalPortal: React.FC<InternationalPortalProps> = ({ onClose }) =>
               <div className={`p-4 rounded-xl border flex gap-3 animate-in fade-in duration-300 ${status.type === 'success' ? 'bg-green-50 border-green-100 text-green-700' : 'bg-red-50 border-red-100 text-red-700'}`}>
                 {status.type === 'success' ? <CheckCircle2 size={20}/> : <AlertCircle size={20}/>}
                 <p className="text-sm font-bold">{status.message}</p>
+              </div>
+            )}
+
+            {/* Delete Confirmation Modal Overlay */}
+            {deleteConfirm && (
+              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[150] flex items-center justify-center p-4">
+                <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200">
+                  <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-6 mx-auto">
+                    <Trash2 className="text-red-600" size={32} />
+                  </div>
+                  <h3 className="text-xl font-black text-slate-800 text-center mb-2">Delete Report?</h3>
+                  <p className="text-slate-500 text-center text-sm mb-8">
+                    Are you sure you want to permanently delete the report for <span className="font-bold text-slate-800">{deleteConfirm.month}</span>? This action cannot be undone.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button 
+                      onClick={() => setDeleteConfirm(null)}
+                      className="px-6 py-3 rounded-xl bg-slate-100 text-slate-600 font-bold uppercase text-[10px] tracking-widest hover:bg-slate-200 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={confirmDelete}
+                      disabled={isSaving}
+                      className="px-6 py-3 rounded-xl bg-red-600 text-white font-bold uppercase text-[10px] tracking-widest hover:bg-red-700 transition-all shadow-lg flex items-center justify-center gap-2"
+                    >
+                      {isSaving ? <Loader2 className="animate-spin" size={14}/> : 'Delete'}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
