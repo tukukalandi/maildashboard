@@ -75,3 +75,10 @@ export interface TargetDataRow {
   // Common
   totalTarget: number;
 }
+
+export interface InternationalReport {
+  id?: string;
+  month: string;
+  data: RawBookingRow[];
+  updatedAt: any;
+}

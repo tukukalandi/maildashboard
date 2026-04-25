@@ -4,17 +4,25 @@ import DashboardAnalysis from './components/DashboardAnalysis';
 import RSBTCellReport from './components/RSBTCellReport';
 import BookingReport from './components/BookingReport';
 import TargetAchievement from './components/TargetAchievement';
+import InternationalPortal from './components/InternationalPortal';
 import { parseExcelFile, fetchMasterDataFromUrl, fetchBookingDataFromUrl, fetchTargetDataFromUrl } from './utils';
-import { BookingDataRow, RawBookingRow, MasterDataRow, TargetDataRow } from './types';
+import { BookingDataRow, RawBookingRow, MasterDataRow, TargetDataRow, InternationalReport } from './types';
 import { MASTER_DATA as DEFAULT_MASTER_DATA } from './constants';
-import { LayoutDashboard, Table, UploadCloud, AlertCircle, RefreshCw, Link as LinkIcon, FileSpreadsheet, FileText, ClipboardList, ArrowLeft, Info, CalendarRange, Target, Database } from 'lucide-react';
+import { db } from './firebase';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { LayoutDashboard, Table, UploadCloud, AlertCircle, RefreshCw, Link as LinkIcon, FileSpreadsheet, FileText, ClipboardList, ArrowLeft, Info, CalendarRange, Target, Database, Globe, ExternalLink, ShieldCheck } from 'lucide-react';
 
 const MASTER_DATA_URL = 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/export?format=csv&gid=2034712139';
 const TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1A1JBFKd57lQteLAsbtrQmVYLi19RHpngJOhf0G_Bacc/edit?gid=1526550329#gid=1526550329';
 const INTERNATIONAL_TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1A1JBFKd57lQteLAsbtrQmVYLi19RHpngJOhf0G_Bacc/edit?gid=1951675497#gid=1951675497';
 const DOMESTIC_TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1A1JBFKd57lQteLAsbtrQmVYLi19RHpngJOhf0G_Bacc/edit?gid=0#gid=0';
 
-const MONTHLY_REPORTS = [
+const MONTHS = [
+  "April 2026", "May 2026", "June 2026", "July 2026", "August 2026", "September 2026",
+  "October 2026", "November 2026", "December 2026", "January 2027", "February 2027", "March 2027"
+];
+
+const MONTHLY_REPORTS_PLACEHOLDERS = [
     { name: 'April 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=0#gid=0' },
     { name: 'May 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=839442657#gid=839442657' },
     { name: 'June 2026', url: 'https://docs.google.com/spreadsheets/d/15mP3CzQ6M9irA8XTj1I3k2FeIwzpzU6HNxsrUsHwiTA/edit?gid=683054627#gid=683054627' },
@@ -85,11 +93,29 @@ function App() {
   const [fromMonthIndex, setFromMonthIndex] = useState(0);
   const [toMonthIndex, setToMonthIndex] = useState(0);
 
+  // Firestore Data State
+  const [internationalReports, setInternationalReports] = useState<InternationalReport[]>([]);
+  const [showPortal, setShowPortal] = useState(false);
+
   useEffect(() => {
     handleSyncMasterData(true);
     handleSyncTargetData(true);
     handleSyncInternationalTargetData(true);
     handleSyncDomesticTargetData(true);
+
+    // Subscribe to Firestore updates
+    const q = query(collection(db, "international_reports"), orderBy("month", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const reports: InternationalReport[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as InternationalReport));
+      setInternationalReports(reports);
+    }, (error) => {
+      console.error("Firestore subscription error", error);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleSyncMasterData = async (silent = false) => {
@@ -282,7 +308,7 @@ function App() {
   };
 
   const loadAnnualReport = () => {
-    loadFromUrl(MONTHLY_REPORTS);
+    loadFromUrl(MONTHLY_REPORTS_PLACEHOLDERS);
   };
 
   const loadSelectedPeriod = () => {
@@ -290,8 +316,14 @@ function App() {
       alert("'To Month' cannot be earlier than 'From Month'.");
       return;
     }
-    const selectedRange = MONTHLY_REPORTS.slice(fromMonthIndex, toMonthIndex + 1);
+    const selectedRange = MONTHLY_REPORTS_PLACEHOLDERS.slice(fromMonthIndex, toMonthIndex + 1);
     loadFromUrl(selectedRange);
+  };
+
+  const loadFromFirestore = (report: InternationalReport) => {
+    setRawBookingData(report.data);
+    setActiveTab('dashboard');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const triggerReupload = () => {
@@ -437,7 +469,7 @@ function App() {
                                   onChange={(e) => setFromMonthIndex(parseInt(e.target.value))}
                                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold shadow-sm focus:ring-2 focus:ring-[#CE2029] focus:outline-none appearance-none cursor-pointer"
                               >
-                                  {MONTHLY_REPORTS.map((m, idx) => (
+                                  {MONTHLY_REPORTS_PLACEHOLDERS.map((m, idx) => (
                                       <option key={m.name} value={idx}>{m.name}</option>
                                   ))}
                               </select>
@@ -449,7 +481,7 @@ function App() {
                                   onChange={(e) => setToMonthIndex(parseInt(e.target.value))}
                                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold shadow-sm focus:ring-2 focus:ring-[#CE2029] focus:outline-none appearance-none cursor-pointer"
                               >
-                                  {MONTHLY_REPORTS.map((m, idx) => (
+                                  {MONTHLY_REPORTS_PLACEHOLDERS.map((m, idx) => (
                                       <option key={m.name} value={idx}>{m.name}</option>
                                   ))}
                               </select>
@@ -466,39 +498,56 @@ function App() {
                 </div>
 
                 <div className="flex items-center gap-4 mb-6">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap">Monthly Quick Access</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap">International Mail Reports</span>
                   <div className="h-px bg-slate-200 flex-1"></div>
+                  <button 
+                    onClick={() => setShowPortal(true)}
+                    className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 text-white rounded-lg hover:bg-black transition-all text-[9px] font-black uppercase tracking-widest shadow-md"
+                  >
+                    <ShieldCheck size={12}/> Admin Portal
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
-                  {MONTHLY_REPORTS.map((month, idx) => {
-                    const colors = [
-                      'bg-rose-50 border-rose-200 text-rose-700 hover:bg-rose-100',
-                      'bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100',
-                      'bg-fuchsia-50 border-fuchsia-200 text-fuchsia-700 hover:bg-fuchsia-100',
-                      'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100',
-                      'bg-violet-50 border-violet-200 text-violet-700 hover:bg-violet-100',
-                      'bg-indigo-50 border-indigo-200 text-indigo-700 hover:bg-indigo-100',
-                      'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100',
-                      'bg-sky-50 border-sky-200 text-sky-700 hover:bg-sky-100',
-                      'bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100',
-                      'bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100',
-                      'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100',
-                      'bg-green-50 border-green-200 text-green-700 hover:bg-green-100',
-                    ];
-                    const colorClass = colors[idx % colors.length];
-                    return (
+                {internationalReports.length === 0 ? (
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 mb-8 text-center bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+                    <div className="w-12 h-12 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center mx-auto mb-4">
+                      <Globe className="text-slate-300" size={24} />
+                    </div>
+                    <p className="text-slate-500 font-bold text-sm">No international reports saved yet.</p>
+                    <p className="text-slate-400 text-[10px] uppercase font-black tracking-widest mt-1">Visit Admin Portal to upload data</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    {internationalReports.map((report) => (
                       <button 
-                        key={month.name} 
-                        onClick={() => loadFromUrl(month.url)} 
-                        disabled={loading} 
-                        className={`p-4 rounded-xl border transition-all text-center group shadow-sm hover:scale-105 active:scale-95 ${colorClass}`}
+                        key={report.id}
+                        onClick={() => loadFromFirestore(report)}
+                        className="flex flex-col p-5 bg-white border border-slate-200 rounded-3xl shadow-sm hover:shadow-xl hover:border-blue-500 transition-all text-left group relative overflow-hidden"
                       >
-                        <span className="font-bold text-xs uppercase tracking-widest">{month.name}</span>
+                        <div className="absolute top-0 right-0 p-3 text-slate-100 group-hover:text-blue-50 group-hover:scale-150 transition-all duration-700">
+                          <Globe size={40} />
+                        </div>
+                        <div className="relative">
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em]">Live Data</span>
+                          </div>
+                          <h4 className="text-lg font-black text-slate-800 leading-tight mb-1">{report.month}</h4>
+                          <div className="flex items-center gap-1.5 text-slate-400">
+                             <FileText size={12} />
+                             <span className="text-[10px] font-bold uppercase">{report.data.length} Records</span>
+                          </div>
+                          <div className="mt-4 flex items-center justify-between">
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">View Analysis</span>
+                            <div className="p-2 bg-slate-50 rounded-lg group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                              <ExternalLink size={14} />
+                            </div>
+                          </div>
+                        </div>
                       </button>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                )}
 
                 <div className="flex items-center gap-4 mb-6">
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] whitespace-nowrap">Source Data Management</span>
@@ -652,6 +701,12 @@ function App() {
                 onReupload={triggerReupload} 
               />
             )}
+          </div>
+        )}
+
+        {showPortal && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[110] flex items-center justify-center p-4">
+             <InternationalPortal onClose={() => setShowPortal(false)} />
           </div>
         )}
       </main>
