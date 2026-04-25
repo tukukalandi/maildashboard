@@ -154,7 +154,7 @@ const parseCSVLine = (text: string): string[] => {
 export const fetchMasterDataFromUrl = async (url: string): Promise<MasterDataRow[]> => {
   try {
     const response = await fetch(url, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`HTTP ${status}: Failed to fetch master data`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}: Failed to fetch master data`);
     const text = await response.text();
     
     const lines = text.split(/\r?\n/);

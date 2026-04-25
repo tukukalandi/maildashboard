@@ -389,9 +389,9 @@ const DashboardAnalysis: React.FC<DashboardAnalysisProps> = ({ data, masterData,
            <SummaryCountCard label="POs NOT Booked" value={bookingAnalysisData.PO_NOT_BOOKED.length} color="text-orange-700" bg="bg-orange-50" active={selectedBookingReport === 'PO_NOT_BOOKED'} onClick={() => handleBookingReportClick('PO_NOT_BOOKED')} />
          </div>
 
-         <div id="booking-detailed-section">
-           {selectedBookingReport && (
-             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-sm mt-4">
+          <div id="booking-detailed-section">
+            {selectedBookingReport && (
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-sm mt-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b border-slate-200 pb-4">
                   <div>
                     <h2 className="text-2xl font-bold text-slate-800">Detailed List: <span className="text-red-700">{selectedBookingReport.replace(/_/g, ' ')}</span></h2>
@@ -443,7 +443,14 @@ const DashboardAnalysis: React.FC<DashboardAnalysisProps> = ({ data, masterData,
              </div>
            )}
          </div>
-      </section>
+       </section>
+
+       <footer className="mt-8 pt-8 border-t border-slate-100 flex flex-col items-center">
+         <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2">Automated Revenue Analysis • Dhenkanal Division</p>
+         <p className="text-sm font-bold text-slate-700">
+           Prepared by <span className="text-[#CE2029]">Kalandi Charan Sahoo</span>, OA, DO, Dhenkanal
+         </p>
+       </footer>
     </div>
   );
 };

@@ -9,7 +9,7 @@ import { BookingDataRow, RawBookingRow, MasterDataRow, TargetDataRow } from './t
 import { MASTER_DATA as DEFAULT_MASTER_DATA } from './constants';
 import { LayoutDashboard, Table, UploadCloud, AlertCircle, RefreshCw, Link as LinkIcon, FileSpreadsheet, FileText, ClipboardList, ArrowLeft, Info, CalendarRange, Target, Database } from 'lucide-react';
 
-const MASTER_DATA_URL = 'https://docs.google.com/spreadsheets/d/1sqgOjtJ5uaiI6qIG_LZMZ-D0yaUhJG_FVxZLDeQORFA/export?format=csv';
+const MASTER_DATA_URL = 'https://docs.google.com/spreadsheets/d/1D_d3iwih0aqEBLD1JQVZr1GUtqtsCQryPT-WoxtCfrc/export?format=csv&gid=2034712139';
 const TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1A1JBFKd57lQteLAsbtrQmVYLi19RHpngJOhf0G_Bacc/edit?gid=1526550329#gid=1526550329';
 const INTERNATIONAL_TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1A1JBFKd57lQteLAsbtrQmVYLi19RHpngJOhf0G_Bacc/edit?gid=1951675497#gid=1951675497';
 const DOMESTIC_TARGET_DATA_URL = 'https://docs.google.com/spreadsheets/d/1A1JBFKd57lQteLAsbtrQmVYLi19RHpngJOhf0G_Bacc/edit?gid=0#gid=0';
@@ -310,31 +310,48 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-900">
       <header className="bg-[#CE2029] shadow-md sticky top-0 z-50 transition-all"> 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-             <button onClick={hardReload} title="Hard Reload App" className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-[#CE2029] font-bold shadow-sm hover:scale-110 transition-transform active:scale-95">IP</button>
-             <h1 className="text-xl font-bold text-white tracking-wide hidden lg:block">Mail Operation 2026-2027</h1>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+             <img 
+               src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg" 
+               alt="Emblem of India" 
+               className="h-14 w-auto brightness-0 invert"
+               referrerPolicy="no-referrer"
+             />
+             <div className="flex flex-col lg:flex-row lg:items-center gap-0 lg:gap-3">
+                <button onClick={hardReload} title="Hard Reload App" className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-[#CE2029] font-black shadow-sm hover:scale-110 transition-transform active:scale-95 text-xl">IP</button>
+                <div className="flex flex-col">
+                  <h1 className="text-lg font-black text-white tracking-tight leading-tight">Mail Operation 2026-2027</h1>
+                  <p className="text-[10px] font-bold text-red-100 uppercase tracking-widest">Dhenkanal Division</p>
+                </div>
+             </div>
           </div>
           
-          <div className="flex items-center gap-2 sm:gap-4 overflow-x-auto no-scrollbar">
-             {rawBookingData.length > 0 && (
-               <button 
-                onClick={triggerReupload} 
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-[10px] font-black uppercase shadow-lg border border-blue-400"
-                title="Go to main screen to re-upload"
-               >
-                 <ArrowLeft size={14}/> Re-upload
-               </button>
-             )}
-
-              <div className="flex gap-1 bg-black/10 p-1 rounded-lg">
+          <div className="flex items-center gap-3 sm:gap-6">
+             <div className="hidden md:flex items-center gap-1 bg-black/10 p-1 rounded-lg">
                 <NavTab active={activeTab === 'datasheet'} onClick={() => setActiveTab('datasheet')} label="Data" icon={<Table size={16}/>}/>
                 <NavTab active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} label="Analysis" icon={<LayoutDashboard size={16}/>}/>
                 <NavTab active={activeTab === 'rsbt'} onClick={() => setActiveTab('rsbt')} label="RSBT Cell" icon={<ClipboardList size={16}/>}/>
                 <NavTab active={activeTab === 'booking'} onClick={() => setActiveTab('booking')} label="Booking Report" icon={<FileText size={16}/>}/>
                 <NavTab active={activeTab === 'target'} onClick={() => setActiveTab('target')} label="Target" icon={<Target size={16}/>}/>
              </div>
+
+             <img 
+               src="https://upload.wikimedia.org/wikipedia/en/3/32/India_Post.svg" 
+               alt="India Post Logo" 
+               className="h-12 w-auto bg-white p-1.5 rounded-xl shadow-inner"
+               referrerPolicy="no-referrer"
+             />
           </div>
+        </div>
+        
+        {/* Mobile Navigation for smaller screens */}
+        <div className="md:hidden bg-[#b01b22] border-t border-red-800 px-4 py-2 flex items-center justify-between overflow-x-auto no-scrollbar gap-2">
+           <NavTab active={activeTab === 'datasheet'} onClick={() => setActiveTab('datasheet')} label="Data" icon={<Table size={14}/>}/>
+           <NavTab active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} label="Analysis" icon={<LayoutDashboard size={14}/>}/>
+           <NavTab active={activeTab === 'rsbt'} onClick={() => setActiveTab('rsbt')} label="RSBT" icon={<ClipboardList size={14}/>}/>
+           <NavTab active={activeTab === 'booking'} onClick={() => setActiveTab('booking')} label="Booking" icon={<FileText size={14}/>}/>
+           <NavTab active={activeTab === 'target'} onClick={() => setActiveTab('target')} label="Target" icon={<Target size={14}/>}/>
         </div>
       </header>
 
@@ -638,6 +655,23 @@ function App() {
           </div>
         )}
       </main>
+
+      <footer className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 mt-auto border-t border-slate-200">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#CE2029]"></div>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
+              Mail Operation 2026-2027 • Dhenkanal Division
+            </p>
+            <div className="w-1.5 h-1.5 rounded-full bg-[#CE2029]"></div>
+          </div>
+          <div className="bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100">
+            <p className="text-sm font-bold text-slate-700">
+              Prepared by <span className="text-[#CE2029]">Kalandi Charan Sahoo</span>, OA, DO, Dhenkanal
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

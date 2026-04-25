@@ -372,6 +372,13 @@ const RSBTCellReport: React.FC<RSBTCellReportProps> = ({ data, masterData, onReu
            </div>
         </div>
       </div>
+
+      <div className="flex flex-col items-center justify-center p-8 border-t border-slate-100 bg-white rounded-2xl shadow-sm">
+        <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2">Internal Monitoring View • Official Record</p>
+        <p className="text-sm font-bold text-slate-600">
+          Prepared by <span className="text-[#CE2029]">Kalandi Charan Sahoo</span>, OA, DO, Dhenkanal
+        </p>
+      </div>
     </div>
   );
 };
