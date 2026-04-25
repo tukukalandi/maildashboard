@@ -208,11 +208,29 @@ const InternationalPortal: React.FC<InternationalPortalProps> = ({ onClose }) =>
   const handleDownloadCSV = (report: InternationalReport) => {
     if (report.data.length === 0) return;
     
-    const headers = Object.keys(report.data[0]).join(',');
+    // Explicit headers in the order they are expected during upload
+    const headerDisplay = [
+      "Office ID", "Office Name", "Product Name", "Articles", "Postage", 
+      "VAS", "Tax", "Prepaid FM", "Prepaid PS", "Prepaid SS", "Total Amount", "Avg Weight"
+    ];
+
+    const fields: (keyof RawBookingRow)[] = [
+      "officeId", "officeName", "productName", "articles", "postage", 
+      "vas", "tax", "prepaidFm", "prepaidPs", "prepaidSs", "totalAmount", "avgWeight"
+    ];
+
     const rows = report.data.map(row => 
-      Object.values(row).map(val => `"${val}"`).join(',')
+      fields.map(field => {
+        const val = row[field] ?? "";
+        // Quote if value contains comma
+        if (typeof val === 'string' && val.includes(',')) {
+          return `"${val}"`;
+        }
+        return val;
+      }).join(',')
     );
-    const csvContent = [headers, ...rows].join('\n');
+
+    const csvContent = [headerDisplay.join(','), ...rows].join('\n');
     
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
