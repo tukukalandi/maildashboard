@@ -55,8 +55,7 @@ export enum ProductGroup {
 }
 
 export interface FilterState {
-  officeId: string;
-  officeName: string;
+  searchQuery: string;
   productName: string;
 }
 

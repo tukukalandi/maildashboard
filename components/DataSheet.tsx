@@ -10,17 +10,16 @@ interface DataSheetProps {
 
 const DataSheet: React.FC<DataSheetProps> = ({ data, onReupload }) => {
   const [filters, setFilters] = useState<FilterState>({
-    officeId: '',
-    officeName: '',
+    searchQuery: '',
     productName: ''
   });
 
   const filteredData = useMemo(() => {
     const filtered = data.filter(row => {
-      const matchId = row.officeId.toLowerCase().includes(filters.officeId.toLowerCase());
-      const matchName = row.officeName.toLowerCase().includes(filters.officeName.toLowerCase());
+      const query = filters.searchQuery.toLowerCase();
+      const matchSearch = row.officeId.toLowerCase().includes(query) || row.officeName.toLowerCase().includes(query);
       const matchProduct = row.productName.toLowerCase().includes(filters.productName.toLowerCase());
-      return matchId && matchName && matchProduct;
+      return matchSearch && matchProduct;
     });
     // Sorting in decreasing order of Total Amount
     return filtered.sort((a, b) => b.totalAmount - a.totalAmount);
@@ -60,24 +59,14 @@ const DataSheet: React.FC<DataSheetProps> = ({ data, onReupload }) => {
     <div className="space-y-4">
       {/* Filters & Actions */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-3 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-        <div className="relative col-span-1">
+        <div className="relative col-span-1 md:col-span-2">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Office ID"
+            placeholder="Search Office ID or Name..."
             className="pl-10 w-full border border-slate-200 rounded-lg py-2 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-50"
-            value={filters.officeId}
-            onChange={e => setFilters({ ...filters, officeId: e.target.value })}
-          />
-        </div>
-        <div className="relative col-span-1">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Office Name"
-            className="pl-10 w-full border border-slate-200 rounded-lg py-2 text-sm focus:ring-2 focus:ring-red-500 focus:outline-none bg-slate-50"
-            value={filters.officeName}
-            onChange={e => setFilters({ ...filters, officeName: e.target.value })}
+            value={filters.searchQuery}
+            onChange={e => setFilters({ ...filters, searchQuery: e.target.value })}
           />
         </div>
         <div className="relative col-span-1">

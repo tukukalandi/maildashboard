@@ -15,7 +15,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isSignedIn() && request.auth.token.email == 'tukukalandi@gmail.com';
+      return isSignedIn() && (request.auth.token.email == 'tukukalandi@gmail.com' || request.auth.token.email == 'dnk005892@gmail.com');
     }
 
     function isValidRawBookingRow(row) {
